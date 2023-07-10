@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<http.Response> responses = await Future.wait([request1, request2]);
 
     // Process the responses and add data to userResponse
-    for (int i = 0; i < responses.length; i++) {
+    for (int i = 0; i < responses.length; i++)  {
       var responseData = jsonDecode(responses[i].body);
       if (i == 0) {
         // Assuming response1 is the question
@@ -111,6 +111,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // Print the userResponse data
     print('Questions: ${userResponse.questions}');
     print('Answer: ${userResponse.answers}');
+    setState(() {
+      addItem(wish);
+    });
   }
 
 
@@ -181,7 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       suffixIcon: IconButton(
                         onPressed: () {
-                          addItem(chat.text);
                           sendQuery(widget.sessionId, chat.text);
                           // add it to a list and iterate below
                           //to call the card funcation
