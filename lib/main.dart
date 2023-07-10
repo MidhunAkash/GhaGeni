@@ -65,11 +65,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> sendQuery(String sessionId, String wish) async {
     UserResponse userResponse = UserResponse();
-    userResponse.wish.add(wish);
-    userResponse.questions.add(["waiting..."]);
-    userResponse.answers.add("Waiting for the response");
-    chat.clear();
-    int index = userResponse.answers.length - 1;
+    setState(() {
+
+      userResponse.questions.add(["waiting..."]);
+      userResponse.answers.add("Waiting for the response");
+      userResponse.wish.add(wish);
+      chat.clear();
+    });
+    int index = userResponse.wish.length - 1;
     // Define the payload for each request
     Map<String, dynamic> payload1 = {
       "product": "question",
@@ -326,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
                     child: ListView.builder(
                         scrollDirection: Axis.vertical,
-                        itemCount: userResponse.answers.length,
+                        itemCount: userResponse.wish.length,
                         itemBuilder: (context, index) {
                           UserResponse userResponse = UserResponse();
                           return CustomContainer(
