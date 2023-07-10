@@ -87,13 +87,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Define the requests
     Future<Response> request1 = dio.request(
-      'https://gcp.nullchapter.tech/api2',
+      'https://ai21.nullchapter.tech/api2',
       data: payload1,
       options: options1,
     );
 
     Future<Response> request2 = dio.request(
-      'https://gcp.nullchapter.tech/api3',
+      'https://ai21.nullchapter.tech/api3',
       data: payload2,
       options: options2,
     );
