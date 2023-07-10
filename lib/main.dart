@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> sendQuery(String sessionId, String wish) async {
     UserResponse userResponse = UserResponse();
+    userResponse.wish.add(wish);
     // Define the payload for each request
     Map<String, dynamic> payload1 = {
       "product": "question",
@@ -199,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderSide:
                             BorderSide(color: Colors.blue.shade100, width: 2),
                       ),
-                      hintText: 'Type your query...',
+                      hintText: 'Make a wish',
                       hintStyle: TextStyle(color: Colors.grey)),
                 ),
               ),
@@ -316,8 +317,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: userRequest.length == 0
-                ? Center(
-                    child: Text("Start searching"),
+                ? const Center(
+                    child: Text("Start doing something idk."),
                   )
                 : Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
@@ -329,7 +330,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           return CustomContainer(
                               height: MediaQuery.of(context).size.height / 2,
                               width: MediaQuery.of(context).size.width,
-                              question: userRequest[index],
+                              question: userResponse.wish[index],
                               answer: userResponse.answers[index],
                               //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
                               questions: userResponse.questions[index]);
@@ -461,6 +462,7 @@ class CustomContainer extends StatelessWidget {
 }
 
 class UserResponse {
+  List<String> wish = [];
   List<List<String>> questions = [];
   List<String> answers = [];
 }
