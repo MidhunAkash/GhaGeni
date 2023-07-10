@@ -53,7 +53,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> bucketList = [];
   PageController pageController = PageController();
   SideMenuController sideMenu = SideMenuController();
   SideMenuDisplayMode displayMode = SideMenuDisplayMode.auto;
@@ -61,65 +60,64 @@ class _MyHomePageState extends State<MyHomePage> {
   String sessionId = "";
 
   UserResponse userResponse = UserResponse();
-
+  BucketList bucketList = BucketList();
 
   Future<void> sendQuery(String sessionId, String wish) async {
-    UserResponse userResponse = UserResponse();
     setState(() {
-
       userResponse.questions.add(["waiting..."]);
       userResponse.answers.add("Waiting for the response");
       userResponse.wish.add(wish);
       chat.clear();
     });
-    int index = userResponse.wish.length - 1;
-    // Define the payload for each request
-    Map<String, dynamic> payload1 = {
-      "product": "question",
-      "sessionId": sessionId,
-    };
-
-    Map<String, dynamic> payload2 = {
-      "product": "answers",
-      "sessionId": sessionId,
-    };
-
-    // Define the headers for each request
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-
-    // Define the requests
-    Future<http.Response> request1 = http.post(
-      Uri.parse('https://gcp.nullchapter.tech/api2'),
-      headers: headers,
-      body: jsonEncode(payload1),
-    );
-
-    Future<http.Response> request2 = http.post(
-      Uri.parse('https://gcp.nullchapter.tech/api3'),
-      headers: headers,
-      body: jsonEncode(payload2),
-    );
-
-    // Perform the requests simultaneously
-    List<http.Response> responses = await Future.wait([request1, request2]);
-
-    // Process the responses and add data to userResponse
-    for (int i = 0; i < responses.length; i++)  {
-      var responseData = jsonDecode(responses[i].body);
-      if (i == 0) {
-        // Assuming response1 is the question
-        userResponse.questions[index] = (List<String>.from(responseData['responseArray']));
-      } else {
-        // Assuming response2 is the answer
-        userResponse.answers[index] = (responseData['resA']['response']);
-      }
-    }
-
-    // Print the userResponse data
-    print('Questions: ${userResponse.questions}');
-    print('Answer: ${userResponse.answers}');
+    // int index = userResponse.wish.length - 1;
+    // // Define the payload for each request
+    // Map<String, dynamic> payload1 = {
+    //   "product": "question",
+    //   "sessionId": sessionId,
+    // };
+    //
+    // Map<String, dynamic> payload2 = {
+    //   "product": "answers",
+    //   "sessionId": sessionId,
+    // };
+    //
+    // // Define the headers for each request
+    // Map<String, String> headers = {
+    //   'Content-Type': 'application/json',
+    // };
+    //
+    // // Define the requests
+    // Future<http.Response> request1 = http.post(
+    //   Uri.parse('https://gcp.nullchapter.tech/api2'),
+    //   headers: headers,
+    //   body: jsonEncode(payload1),
+    // );
+    //
+    // Future<http.Response> request2 = http.post(
+    //   Uri.parse('https://gcp.nullchapter.tech/api3'),
+    //   headers: headers,
+    //   body: jsonEncode(payload2),
+    // );
+    //
+    // // Perform the requests simultaneously
+    // List<http.Response> responses = await Future.wait([request1, request2]);
+    //
+    // // Process the responses and add data to userResponse
+    // for (int i = 0; i < responses.length; i++)  {
+    //   var responseData = jsonDecode(responses[i].body);
+    //   if (i == 0) {
+    //     // Assuming response1 is the question
+    //     userResponse.questions[index] = (List<String>.from(responseData['responseArray']));
+    //   } else {
+    //     // Assuming response2 is the answer
+    //     userResponse.answers[index] = (responseData['resA']['response']);
+    //   }
+    // }
+    // setState(() { });
+    // // Print the userResponse data
+    // print("wish: ${userResponse.wish}");
+    // print('Questions: ${userResponse.questions}');
+    // print('Answer: ${userResponse.answers}');
   }
 
 
@@ -144,7 +142,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          bucketList.add(text);
+          //if(text != "waiting"){
+            bucketList.bucketList.add(text);
+          //}
         });
       },
       child: Container(width: 300, child: Card(
@@ -305,18 +305,18 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             items: [
-              for (int i = 0; i < bucketList.length; i++)
+              for (int i = 0; i < bucketList.bucketList.length; i++)
                 SideMenuItem(
                   priority: i + 1,
-                  title: bucketList[i],
+                  title: bucketList.bucketList[i],
                   onTap: (index, _) {
-                    sendQuery(sessionId, bucketList[i]);
+                    sendQuery(sessionId, bucketList.bucketList[i]);
                   },
                   iconWidget: CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     child: Text("#${i + 1}"),
                   ),
-                  tooltipContent: bucketList[i],
+                  tooltipContent: bucketList.bucketList[i],
                 ),
             ],
           ),
@@ -331,7 +331,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         scrollDirection: Axis.vertical,
                         itemCount: userResponse.wish.length,
                         itemBuilder: (context, index) {
-                          UserResponse userResponse = UserResponse();
                           return CustomContainer(
                               height: MediaQuery.of(context).size.height / 2,
                               width: MediaQuery.of(context).size.width,
@@ -348,8 +347,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CustomContainer extends StatelessWidget {
-  CustomContainer({
+class CustomContainer extends StatefulWidget {
+  const CustomContainer({
     super.key,
     required this.height,
     required this.width,
@@ -364,13 +363,21 @@ class CustomContainer extends StatelessWidget {
   //implement list
   final double height;
   final double width;
+
+  @override
+  State<CustomContainer> createState() => _CustomContainerState();
+}
+
+class _CustomContainerState extends State<CustomContainer> {
   final Color color = Colors.grey[400]!;
+
+  BucketList bucketList = BucketList();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
-      width: width,
+      height: widget.height,
+      width: widget.width,
       margin: EdgeInsets.all(8.0),
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -382,7 +389,7 @@ class CustomContainer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              question,
+              widget.question,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -390,7 +397,7 @@ class CustomContainer extends StatelessWidget {
             ),
             SizedBox(height: 15),
             Text(
-              answer,
+              widget.answer,
               textAlign: TextAlign.justify,
               maxLines: null,
               style: TextStyle(
@@ -447,17 +454,16 @@ class CustomContainer extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: questions.length,
+                itemCount: widget.questions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  BucketList bucketList = BucketList();
-                  return GestureDetector(
-                    onTap: () {
-                        bucketList.bucketList.add(questions[index]);
-                    },
-                    child: Container(width: 300, child: Card(
-                        margin: EdgeInsets.all(10),
-                        child: Center(child: Text(questions[index])))),
-                  );;
+                  return SizedBox(width: 300, child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          bucketList.bucketList.add(widget.questions[index]);
+                        });
+                      },
+                        child: Center(child: Text(widget.questions[index])))
+                    );
                 },
               ),
             ), //options //todo
