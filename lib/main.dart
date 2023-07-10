@@ -69,55 +69,55 @@ class _MyHomePageState extends State<MyHomePage> {
       userResponse.wish.add(wish);
       chat.clear();
     });
-    // int index = userResponse.wish.length - 1;
-    // // Define the payload for each request
-    // Map<String, dynamic> payload1 = {
-    //   "product": "question",
-    //   "sessionId": sessionId,
-    // };
-    //
-    // Map<String, dynamic> payload2 = {
-    //   "product": "answers",
-    //   "sessionId": sessionId,
-    // };
-    //
-    // // Define the headers for each request
-    // Map<String, String> headers = {
-    //   'Content-Type': 'application/json',
-    // };
-    //
-    // // Define the requests
-    // Future<http.Response> request1 = http.post(
-    //   Uri.parse('https://gcp.nullchapter.tech/api2'),
-    //   headers: headers,
-    //   body: jsonEncode(payload1),
-    // );
-    //
-    // Future<http.Response> request2 = http.post(
-    //   Uri.parse('https://gcp.nullchapter.tech/api3'),
-    //   headers: headers,
-    //   body: jsonEncode(payload2),
-    // );
-    //
-    // // Perform the requests simultaneously
-    // List<http.Response> responses = await Future.wait([request1, request2]);
-    //
-    // // Process the responses and add data to userResponse
-    // for (int i = 0; i < responses.length; i++)  {
-    //   var responseData = jsonDecode(responses[i].body);
-    //   if (i == 0) {
-    //     // Assuming response1 is the question
-    //     userResponse.questions[index] = (List<String>.from(responseData['responseArray']));
-    //   } else {
-    //     // Assuming response2 is the answer
-    //     userResponse.answers[index] = (responseData['resA']['response']);
-    //   }
-    // }
-    // setState(() { });
-    // // Print the userResponse data
-    // print("wish: ${userResponse.wish}");
-    // print('Questions: ${userResponse.questions}');
-    // print('Answer: ${userResponse.answers}');
+    int index = userResponse.wish.length - 1;
+    // Define the payload for each request
+    Map<String, dynamic> payload1 = {
+      "product": "question",
+      "sessionId": sessionId,
+    };
+
+    Map<String, dynamic> payload2 = {
+      "product": "answers",
+      "sessionId": sessionId,
+    };
+
+    // Define the headers for each request
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Define the requests
+    Future<http.Response> request1 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api2'),
+      headers: headers,
+      body: jsonEncode(payload1),
+    );
+
+    Future<http.Response> request2 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api3'),
+      headers: headers,
+      body: jsonEncode(payload2),
+    );
+
+    // Perform the requests simultaneously
+    List<http.Response> responses = await Future.wait([request1, request2]);
+
+    // Process the responses and add data to userResponse
+    for (int i = 0; i < responses.length; i++)  {
+      var responseData = jsonDecode(responses[i].body);
+      if (i == 0) {
+        // Assuming response1 is the question
+        userResponse.questions[index] = (List<String>.from(responseData['responseArray'])).map((item) => questionButton(item)).toList();
+      } else {
+        // Assuming response2 is the answer
+        userResponse.answers[index] = (responseData['resA']['response']);
+      }
+    }
+    setState(() { });
+    // Print the userResponse data
+    print("wish: ${userResponse.wish}");
+    print('Questions: ${userResponse.questions}');
+    print('Answer: ${userResponse.answers}');
   }
 
 
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          if(text != "waiting"){
+          if(text != "waiting..."){
             bucketList.bucketList.add(text);
           }
         });
