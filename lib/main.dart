@@ -63,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   Future<void> sendQuery(String sessionId, String wish) async {
+    UserResponse userResponse = UserResponse();
     // Define the payload for each request
     Map<String, dynamic> payload1 = {
       "product": "question",
@@ -95,10 +96,21 @@ class _MyHomePageState extends State<MyHomePage> {
     // Perform the requests simultaneously
     List<http.Response> responses = await Future.wait([request1, request2]);
 
-    // Print the responses
-    responses.forEach((response) {
-      print('Response: ${response.body}');
-    });
+    // Process the responses and add data to userResponse
+    for (int i = 0; i < responses.length; i++) {
+      var responseData = jsonDecode(responses[i].body);
+      if (i == 0) {
+        // Assuming response1 is the question
+        userResponse.questions = List<String>.from(responseData['responseArray']);
+      } else {
+        // Assuming response2 is the answer
+        userResponse.answer = responseData['resA']['response'];
+      }
+    }
+
+    // Print the userResponse data
+    print('Questions: ${userResponse.questions}');
+    print('Answer: ${userResponse.answer}');
   }
 
 
@@ -447,4 +459,9 @@ class CustomContainer extends StatelessWidget {
           ]),
     );
   }
+}
+
+class UserResponse {
+  List<String> questions = [];
+  String answer = '';
 }
