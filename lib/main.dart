@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           bucketList.add(text);
         });
-
       },
       child: Container(width: 300, child: Card(
           margin: EdgeInsets.all(10),
@@ -230,7 +229,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 SideMenuItem(
                   priority: i + 1,
                   title: bucketList[i],
-                  onTap: (index, _) {},
+                  onTap: (index, _) {
+
+                  },
                   iconWidget: CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     child: Text("#${i + 1}"),
@@ -255,11 +256,19 @@ class _MyHomePageState extends State<MyHomePage> {
                               width: MediaQuery.of(context).size.width,
                               question: userRequest[index],
                               answer:
-                                  "<API RESPONSE ADD HERE>   In this example, we use a GestureDetector to detect vertical drag gestures on the container. When the user drags vertically, the onVerticalDragUpdate callback is triggered, and the containerHeight value is updated accordingly. The Container widget is wrapped in a GestureDetector and its height is set to containerHeight.When you run this code, you'll see a screen with a blue container. You can drag vertically inside the container to adjust its height. The containerHeight value is updated dynamically, causing the container's height to change accordingly.Feel free to customize the container's color, initial height, and other properties to fit your requirements.",
+                                  "That's great! Here are couple of things you might need to consider:"
+
+                              "Define the Purpose: Determine what the main goal of your web app is. This could be anything from providing information to selling products or services."
+
+                          "Design: Design your web app in a way that is intuitive and user-friendly. The design should be attractive, but also functional."
+
+                          "Development: Choose the right technology stack for your web app. This could include front-end and back-end languages, databases, and servers.",
                               //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
                               questions: [
-                                questionButton("This is a Question ejkncrn jjc jj c  wc wouhc wu c coj dcouw c ojh doc wcouh d ?"),
-                                questionButton("Something else ?"),
+                                questionButton("Have I planned for the security measures like data encryption and user authentication?"),
+                                questionButton("Have I considered how to optimize the web app for mobile devices?"),
+                                questionButton("Have I thought about how to handle and store user data in compliance with privacy laws??"),
+                                questionButton("See More"),
                               ]);
                         }),
                   ),
