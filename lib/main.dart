@@ -53,7 +53,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> userRequest = [];
   List<String> bucketList = [];
   PageController pageController = PageController();
   SideMenuController sideMenu = SideMenuController();
@@ -61,10 +60,16 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController chat = TextEditingController();
   String sessionId = "";
 
+  UserResponse userResponse = UserResponse();
+
 
   Future<void> sendQuery(String sessionId, String wish) async {
     UserResponse userResponse = UserResponse();
     userResponse.wish.add(wish);
+    userResponse.questions.add(["waiting..."]);
+    userResponse.answers.add("Waiting for the response");
+    chat.clear();
+    int index = userResponse.answers.length - 1;
     // Define the payload for each request
     Map<String, dynamic> payload1 = {
       "product": "question",
@@ -102,19 +107,16 @@ class _MyHomePageState extends State<MyHomePage> {
       var responseData = jsonDecode(responses[i].body);
       if (i == 0) {
         // Assuming response1 is the question
-        userResponse.questions.add(List<String>.from(responseData['responseArray']));
+        userResponse.questions[index] = (List<String>.from(responseData['responseArray']));
       } else {
         // Assuming response2 is the answer
-        userResponse.answers.add(responseData['resA']['response']);
+        userResponse.answers[index] = (responseData['resA']['response']);
       }
     }
 
     // Print the userResponse data
     print('Questions: ${userResponse.questions}');
     print('Answer: ${userResponse.answers}');
-    setState(() {
-      addItem(wish);
-    });
   }
 
 
@@ -128,13 +130,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  void addItem(String text) {
-    setState(() {
-      debugPrint("you have entered: ${chat.text}");
-      userRequest.add(text);
-      chat.clear();
-    });
-  }
+  // void addItem(String text) {
+  //   setState(() {
+  //     debugPrint("you have entered: ${chat.text}");
+  //     userRequest.add(text);
+  //     chat.clear();
+  //   });
+  // }
   Widget questionButton(String text) {
     return GestureDetector(
       onTap: () {
@@ -316,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Expanded(
-            child: userRequest.length == 0
+            child: userResponse.answers.isEmpty
                 ? const Center(
                     child: Text("Start doing something idk."),
                   )
@@ -324,7 +326,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
                     child: ListView.builder(
                         scrollDirection: Axis.vertical,
-                        itemCount: userRequest.length,
+                        itemCount: userResponse.answers.length,
                         itemBuilder: (context, index) {
                           UserResponse userResponse = UserResponse();
                           return CustomContainer(
