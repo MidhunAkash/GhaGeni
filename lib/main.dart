@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,48 +63,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   Future<void> sendQuery(String sessionId, String wish) async {
-    Dio dio = Dio();
-
     // Define the payload for each request
     Map<String, dynamic> payload1 = {
-      "product": wish,
+      "product": "question",
       "sessionId": sessionId,
     };
 
     Map<String, dynamic> payload2 = {
-      "product": wish,
+      "product": "answers",
       "sessionId": sessionId,
     };
 
-    // Define the options for each request
-    Options options1 = Options(
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
-
-    Options options2 = options1;
+    // Define the headers for each request
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
 
     // Define the requests
-    Future<Response> request1 = dio.request(
-      'https://ai21.nullchapter.tech/api2',
-      data: payload1,
-      options: options1,
+    Future<http.Response> request1 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api2'),
+      headers: headers,
+      body: jsonEncode(payload1),
     );
 
-    Future<Response> request2 = dio.request(
-      'https://ai21.nullchapter.tech/api3',
-      data: payload2,
-      options: options2,
+    Future<http.Response> request2 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api3'),
+      headers: headers,
+      body: jsonEncode(payload2),
     );
 
     // Perform the requests simultaneously
-    List<Response> responses = await Future.wait([request1, request2]);
+    List<http.Response> responses = await Future.wait([request1, request2]);
 
     // Print the responses
     responses.forEach((response) {
-      print('Response: ${response.data}');
+      print('Response: ${response.body}');
     });
   }
 
