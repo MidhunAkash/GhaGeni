@@ -1,16 +1,31 @@
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+String generateSessionId(int length) {
+  var rand =  Random();
+  var codeUnits =  List.generate(
+      length,
+          (index){
+        return rand.nextInt(33)+89;
+      }
+  );
+
+  return  String.fromCharCodes(codeUnits);
+}
+
 void main() {
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
+  final String sessionId = generateSessionId(10);
 
   // This widget is the root of your application.
   @override
@@ -22,15 +37,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page', sessionId: sessionId,),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.sessionId}) : super(key: key);
 
-  final String title;
+  final String title,sessionId;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -43,12 +58,63 @@ class _MyHomePageState extends State<MyHomePage> {
   SideMenuController sideMenu = SideMenuController();
   SideMenuDisplayMode displayMode = SideMenuDisplayMode.auto;
   TextEditingController chat = TextEditingController();
+  String sessionId = "";
+
+
+  Future<void> sendQuery(String sessionId, String wish) async {
+    Dio dio = Dio();
+
+    // Define the payload for each request
+    Map<String, dynamic> payload1 = {
+      "product": wish,
+      "sessionId": sessionId,
+    };
+
+    Map<String, dynamic> payload2 = {
+      "product": wish,
+      "sessionId": sessionId,
+    };
+
+    // Define the options for each request
+    Options options1 = Options(
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    Options options2 = options1;
+
+    // Define the requests
+    Future<Response> request1 = dio.request(
+      'https://gcp.nullchapter.tech/api2',
+      data: payload1,
+      options: options1,
+    );
+
+    Future<Response> request2 = dio.request(
+      'https://gcp.nullchapter.tech/api3',
+      data: payload2,
+      options: options2,
+    );
+
+    // Perform the requests simultaneously
+    List<Response> responses = await Future.wait([request1, request2]);
+
+    // Print the responses
+    responses.forEach((response) {
+      print('Response: ${response.data}');
+    });
+  }
+
+
 
   @override
   void initState() {
     sideMenu.addListener((index) {
       pageController.jumpToPage(index);
     });
+
     super.initState();
   }
 
@@ -110,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       suffixIcon: IconButton(
                         onPressed: () {
                           addItem(chat.text);
-
+                          sendQuery(widget.sessionId, chat.text);
                           // add it to a list and iterate below
                           //to call the card funcation
                         },
