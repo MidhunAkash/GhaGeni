@@ -9,23 +9,20 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 String generateSessionId(int length) {
-  var rand =  Random();
-  var codeUnits =  List.generate(
-      length,
-          (index){
-        return rand.nextInt(33)+89;
-      }
-  );
+  var rand = Random();
+  var codeUnits = List.generate(length, (index) {
+    return rand.nextInt(33) + 89;
+  });
 
-  return  String.fromCharCodes(codeUnits);
+  return String.fromCharCodes(codeUnits);
 }
 
 void main() {
-  runApp( MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-   MyApp({super.key});
+  MyApp({super.key});
   final String sessionId = generateSessionId(10);
 
   // This widget is the root of your application.
@@ -38,15 +35,19 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page', sessionId: sessionId,),
+      home: MyHomePage(
+        title: 'Flutter Demo Home Page',
+        sessionId: sessionId,
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title, required this.sessionId}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.sessionId})
+      : super(key: key);
 
-  final String title,sessionId;
+  final String title, sessionId;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -120,8 +121,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // print('Answer: ${userResponse.answers}');
   }
 
-
-
   @override
   void initState() {
     sideMenu.addListener((index) {
@@ -143,15 +142,17 @@ class _MyHomePageState extends State<MyHomePage> {
       onTap: () {
         setState(() {
           //if(text != "waiting"){
-            bucketList.bucketList.add(text);
+          bucketList.bucketList.add(text);
           //}
         });
       },
-      child: Container(width: 300, child: Card(
-          margin: EdgeInsets.all(10),
-          child: Center(child: Text(text)))),
+      child: Container(
+          width: 300,
+          child: Card(
+              margin: EdgeInsets.all(10), child: Center(child: Text(text)))),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     double swidth = MediaQuery.of(context).size.width;
@@ -331,13 +332,41 @@ class _MyHomePageState extends State<MyHomePage> {
                         scrollDirection: Axis.vertical,
                         itemCount: userResponse.wish.length,
                         itemBuilder: (context, index) {
-                          return CustomContainer(
-                              height: MediaQuery.of(context).size.height / 2,
-                              width: MediaQuery.of(context).size.width,
-                              question: userResponse.wish[index],
-                              answer: userResponse.answers[index],
-                              //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
-                              questions: userResponse.questions[index]);
+                          return Column(
+                            children: [
+                              CustomContainer(
+                                  height: MediaQuery.of(context).size.height / 2,
+                                  width: MediaQuery.of(context).size.width,
+                                  question: userResponse.wish[index],
+                                  answer: userResponse.answers[index],
+                                  //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
+                                  //questions: userResponse.questions[index]),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: userResponse.questions[index].length,
+                                  itemBuilder: (BuildContext context, int i) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          bucketList.bucketList.add(bucketList.bucketList[i]);
+                                          debugPrint(bucketList.bucketList[i]);
+                                        });
+                                      },
+                                      child: Container(
+                                          width: 300,
+                                          child: Card(
+                                              margin: EdgeInsets.all(10),
+                                              child:
+                                              Center(child: Text(userResponse.questions[index][i])))),
+                                    );
+                                    ;
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
                         }),
                   ),
           ),
@@ -354,10 +383,10 @@ class CustomContainer extends StatefulWidget {
     required this.width,
     required this.question,
     required this.answer,
-    required this.questions,
+    //required this.questions,
     //required this.onTap,
   });
-  final List<String> questions;
+  //final List<String> questions;
   final String question;
   final String answer;
   //implement list
@@ -451,24 +480,29 @@ class _CustomContainerState extends State<CustomContainer> {
             //   ),
             // ), //answer
 
-            Expanded(
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.questions.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        bucketList.bucketList.add(widget.questions[index]);
-                      });
-                    },
-                    child: Container(width: 300, child: Card(
-                        margin: EdgeInsets.all(10),
-                        child: Center(child: Text(widget.questions[index])))),
-                  );;
-                },
-              ),
-            ), //options //todo
+            // Expanded(
+            //   child: ListView.builder(
+            //     scrollDirection: Axis.horizontal,
+            //     itemCount: widget.questions.length,
+            //     itemBuilder: (BuildContext context, int index) {
+            //       return GestureDetector(
+            //         onTap: () {
+            //           setState(() {
+            //             bucketList.bucketList.add(widget.questions[index]);
+            //             debugPrint(widget.questions[index]);
+            //           });
+            //         },
+            //         child: Container(
+            //             width: 300,
+            //             child: Card(
+            //                 margin: EdgeInsets.all(10),
+            //                 child:
+            //                     Center(child: Text(widget.questions[index])))),
+            //       );
+            //       ;
+            //     },
+            //   ),
+            // ),
           ]),
     );
   }
