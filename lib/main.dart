@@ -101,16 +101,16 @@ class _MyHomePageState extends State<MyHomePage> {
       var responseData = jsonDecode(responses[i].body);
       if (i == 0) {
         // Assuming response1 is the question
-        userResponse.questions = List<String>.from(responseData['responseArray']);
+        userResponse.questions.add(List<String>.from(responseData['responseArray']));
       } else {
         // Assuming response2 is the answer
-        userResponse.answer = responseData['resA']['response'];
+        userResponse.answers = responseData['resA']['response'];
       }
     }
 
     // Print the userResponse data
     print('Questions: ${userResponse.questions}');
-    print('Answer: ${userResponse.answer}');
+    print('Answer: ${userResponse.answers}');
   }
 
 
@@ -323,25 +323,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         scrollDirection: Axis.vertical,
                         itemCount: userRequest.length,
                         itemBuilder: (context, index) {
+                          UserResponse userResponse = UserResponse();
                           return CustomContainer(
                               height: MediaQuery.of(context).size.height / 2,
                               width: MediaQuery.of(context).size.width,
                               question: userRequest[index],
-                              answer:
-                                  "That's great! Here are couple of things you might need to consider:"
-
-                              "Define the Purpose: Determine what the main goal of your web app is. This could be anything from providing information to selling products or services."
-
-                          "Design: Design your web app in a way that is intuitive and user-friendly. The design should be attractive, but also functional."
-
-                          "Development: Choose the right technology stack for your web app. This could include front-end and back-end languages, databases, and servers.",
+                              answer: userResponse.answers[index],
                               //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
-                              questions: [
-                                questionButton("Have I planned for the security measures like data encryption and user authentication?"),
-                                questionButton("Have I considered how to optimize the web app for mobile devices?"),
-                                questionButton("Have I thought about how to handle and store user data in compliance with privacy laws??"),
-                                questionButton("See More"),
-                              ]);
+                              questions: userResponse.questions[index]);
                         }),
                   ),
           ),
@@ -361,7 +350,7 @@ class CustomContainer extends StatelessWidget {
     required this.questions,
     //required this.onTap,
   });
-  final List<Widget> questions;
+  final List<String> questions;
   final String question;
   final String answer;
   //implement list
@@ -452,7 +441,15 @@ class CustomContainer extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: questions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return questions[index];
+                  BucketList bucketList = BucketList();
+                  return GestureDetector(
+                    onTap: () {
+                        bucketList.bucketList.add(questions[index]);
+                    },
+                    child: Container(width: 300, child: Card(
+                        margin: EdgeInsets.all(10),
+                        child: Center(child: Text(questions[index])))),
+                  );;
                 },
               ),
             ), //options //todo
@@ -462,6 +459,10 @@ class CustomContainer extends StatelessWidget {
 }
 
 class UserResponse {
-  List<String> questions = [];
-  String answer = '';
+  List<List<String>> questions = [];
+  List<String> answers = [];
+}
+
+class BucketList {
+  List<String> bucketList = [];
 }
