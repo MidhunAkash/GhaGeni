@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
         userResponse.questions.add(List<String>.from(responseData['responseArray']));
       } else {
         // Assuming response2 is the answer
-        userResponse.answers = responseData['resA']['response'];
+        userResponse.answers.add(responseData['resA']['response']);
       }
     }
 
@@ -304,7 +304,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   priority: i + 1,
                   title: bucketList[i],
                   onTap: (index, _) {
-
+                    sendQuery(sessionId, bucketList[i]);
                   },
                   iconWidget: CircleAvatar(
                     backgroundColor: Colors.grey[300],
