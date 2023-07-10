@@ -142,9 +142,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          //if(text != "waiting"){
+          if(text != "waiting"){
             bucketList.bucketList.add(text);
-          //}
+          }
         });
       },
       child: Container(width: 300, child: Card(
