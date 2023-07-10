@@ -456,14 +456,16 @@ class _CustomContainerState extends State<CustomContainer> {
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.questions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(width: 300, child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          bucketList.bucketList.add(widget.questions[index]);
-                        });
-                      },
-                        child: Center(child: Text(widget.questions[index])))
-                    );
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        bucketList.bucketList.add(widget.questions[index]);
+                      });
+                    },
+                    child: Container(width: 300, child: Card(
+                        margin: EdgeInsets.all(10),
+                        child: Center(child: Text(widget.questions[index])))),
+                  );;
                 },
               ),
             ), //options //todo
