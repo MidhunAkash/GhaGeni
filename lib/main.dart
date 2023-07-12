@@ -1,16 +1,32 @@
+import 'dart:math';
 import 'dart:ui';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+String generateSessionId(int length) {
+  var rand =  Random();
+  var codeUnits =  List.generate(
+      length,
+          (index){
+        return rand.nextInt(33)+89;
+      }
+  );
+
+  return  String.fromCharCodes(codeUnits);
+}
+
 void main() {
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
+  final String sessionId = generateSessionId(10);
 
   // This widget is the root of your application.
   @override
@@ -22,48 +38,113 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page', sessionId: sessionId,),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.sessionId}) : super(key: key);
 
-  final String title;
+  final String title,sessionId;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> userRequest = [];
-  List<String> bucketList = [];
   PageController pageController = PageController();
   SideMenuController sideMenu = SideMenuController();
   SideMenuDisplayMode displayMode = SideMenuDisplayMode.auto;
   TextEditingController chat = TextEditingController();
+  String sessionId = "";
+
+  UserResponse userResponse = UserResponse();
+  BucketList bucketList = BucketList();
+
+  Future<void> sendQuery(String sessionId, String wish) async {
+    setState(() {
+      userResponse.questions.add([questionButton("waiting...")]);
+      userResponse.answers.add("Waiting for the response");
+      userResponse.wish.add(wish);
+      chat.clear();
+    });
+    int index = userResponse.wish.length - 1;
+    // Define the payload for each request
+    Map<String, dynamic> payload1 = {
+      "product": "question",
+      "sessionId": sessionId,
+    };
+
+    Map<String, dynamic> payload2 = {
+      "product": "answers",
+      "sessionId": sessionId,
+    };
+
+    // Define the headers for each request
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Define the requests
+    Future<http.Response> request1 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api2'),
+      headers: headers,
+      body: jsonEncode(payload1),
+    );
+
+    Future<http.Response> request2 = http.post(
+      Uri.parse('https://gcp.nullchapter.tech/api3'),
+      headers: headers,
+      body: jsonEncode(payload2),
+    );
+
+    // Perform the requests simultaneously
+    List<http.Response> responses = await Future.wait([request1, request2]);
+
+    // Process the responses and add data to userResponse
+    for (int i = 0; i < responses.length; i++)  {
+      var responseData = jsonDecode(responses[i].body);
+      if (i == 0) {
+        // Assuming response1 is the question
+        userResponse.questions[index] = (List<String>.from(responseData['responseArray'])).map((item) => questionButton(item)).toList();
+      } else {
+        // Assuming response2 is the answer
+        userResponse.answers[index] = (responseData['resA']['response']);
+      }
+    }
+    setState(() { });
+    // Print the userResponse data
+    print("wish: ${userResponse.wish}");
+    print('Questions: ${userResponse.questions}');
+    print('Answer: ${userResponse.answers}');
+  }
+
+
 
   @override
   void initState() {
     sideMenu.addListener((index) {
       pageController.jumpToPage(index);
     });
+
     super.initState();
   }
 
-  void addItem(String text) {
-    setState(() {
-      debugPrint("you have entered: ${chat.text}");
-      userRequest.add(text);
-      chat.clear();
-    });
-  }
+  // void addItem(String text) {
+  //   setState(() {
+  //     debugPrint("you have entered: ${chat.text}");
+  //     userRequest.add(text);
+  //     chat.clear();
+  //   });
+  // }
   Widget questionButton(String text) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          bucketList.add(text);
+          if(text != "waiting..."){
+            bucketList.bucketList.add(text);
+          }
         });
       },
       child: Container(width: 300, child: Card(
@@ -109,8 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       suffixIcon: IconButton(
                         onPressed: () {
-                          addItem(chat.text);
-
+                          sendQuery(widget.sessionId, chat.text);
                           // add it to a list and iterate below
                           //to call the card funcation
                         },
@@ -125,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderSide:
                             BorderSide(color: Colors.blue.shade100, width: 2),
                       ),
-                      hintText: 'Type your query...',
+                      hintText: 'Make a wish',
                       hintStyle: TextStyle(color: Colors.grey)),
                 ),
               ),
@@ -225,51 +305,39 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             items: [
-              for (int i = 0; i < bucketList.length; i++)
+              for (int i = 0; i < bucketList.bucketList.length; i++)
                 SideMenuItem(
                   priority: i + 1,
-                  title: bucketList[i],
+                  title: bucketList.bucketList[i],
                   onTap: (index, _) {
-
+                    sendQuery(sessionId, bucketList.bucketList[i]);
                   },
                   iconWidget: CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     child: Text("#${i + 1}"),
                   ),
-                  tooltipContent: bucketList[i],
+                  tooltipContent: bucketList.bucketList[i],
                 ),
             ],
           ),
           Expanded(
-            child: userRequest.length == 0
-                ? Center(
-                    child: Text("Start searching"),
+            child: userResponse.answers.isEmpty
+                ? const Center(
+                    child: Text("Start doing something idk."),
                   )
                 : Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 80),
                     child: ListView.builder(
                         scrollDirection: Axis.vertical,
-                        itemCount: userRequest.length,
+                        itemCount: userResponse.wish.length,
                         itemBuilder: (context, index) {
                           return CustomContainer(
                               height: MediaQuery.of(context).size.height / 2,
                               width: MediaQuery.of(context).size.width,
-                              question: userRequest[index],
-                              answer:
-                                  "That's great! Here are couple of things you might need to consider:"
-
-                              "Define the Purpose: Determine what the main goal of your web app is. This could be anything from providing information to selling products or services."
-
-                          "Design: Design your web app in a way that is intuitive and user-friendly. The design should be attractive, but also functional."
-
-                          "Development: Choose the right technology stack for your web app. This could include front-end and back-end languages, databases, and servers.",
+                              question: userResponse.wish[index],
+                              answer: userResponse.answers[index],
                               //"To create a ListView inside a Column of a custom widget, you can follow these steps:Create a custom widget: Define a new widget class that extends StatelessWidget or StatefulWidget based on your requirements. This custom widget will contain the Column and the ListView.",
-                              questions: [
-                                questionButton("Have I planned for the security measures like data encryption and user authentication?"),
-                                questionButton("Have I considered how to optimize the web app for mobile devices?"),
-                                questionButton("Have I thought about how to handle and store user data in compliance with privacy laws??"),
-                                questionButton("See More"),
-                              ]);
+                              questions: userResponse.questions[index]);
                         }),
                   ),
           ),
@@ -279,8 +347,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CustomContainer extends StatelessWidget {
-  CustomContainer({
+class CustomContainer extends StatefulWidget {
+  const CustomContainer({
     super.key,
     required this.height,
     required this.width,
@@ -295,13 +363,21 @@ class CustomContainer extends StatelessWidget {
   //implement list
   final double height;
   final double width;
+
+  @override
+  State<CustomContainer> createState() => _CustomContainerState();
+}
+
+class _CustomContainerState extends State<CustomContainer> {
   final Color color = Colors.grey[400]!;
+
+  BucketList bucketList = BucketList();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
-      width: width,
+      height: widget.height,
+      width: widget.width,
       margin: EdgeInsets.all(8.0),
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -313,7 +389,7 @@ class CustomContainer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              question,
+              widget.question,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -321,7 +397,7 @@ class CustomContainer extends StatelessWidget {
             ),
             SizedBox(height: 15),
             Text(
-              answer,
+              widget.answer,
               textAlign: TextAlign.justify,
               maxLines: null,
               style: TextStyle(
@@ -378,13 +454,23 @@ class CustomContainer extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: questions.length,
+                itemCount: widget.questions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return questions[index];
+                  return widget.questions[index];
                 },
               ),
             ), //options //todo
           ]),
     );
   }
+}
+
+class UserResponse {
+  List<String> wish = [];
+  List<List<Widget>> questions = [];
+  List<String> answers = [];
+}
+
+class BucketList {
+  List<String> bucketList = [];
 }
